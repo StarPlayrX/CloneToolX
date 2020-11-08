@@ -178,6 +178,7 @@ func diskInfo (volume: String) -> diskInfoType {
                       TypeBundle: TypeBundle,               Owners: Owners,
                       OSCanBeInstalled: OSCanBeInstalled) as diskInfoType
     
+    print(returnData)
     
     return returnData
 }

@@ -48,15 +48,14 @@ class DiskToImage: NSViewController {
         
         fieldEditor?.selectedRange = range
     }
+    
     override func viewWillAppear() {
         diskimageName.stringValue = diskImageName + dmgSuffix
         disk2imageFolder = disk2imageFolder + folderSlash
         diskToImageParentFolder.stringValue = disk2imageFolder
     }
+    
     override func viewDidLoad() {
         super.viewDidLoad()
-        
-        print("Hello")
-        
     }
 }

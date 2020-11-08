@@ -78,20 +78,19 @@ class ViewController: NSViewController {
 
         }
         
-        statusTextView.string = statusTextView.string + runCommandReturnString(binary: "/usr/sbin/diskutil", arguments: unMountSource)
-        let unmountSourceString = statusTextView.string.replacingOccurrences(of: "\n", with: "")
-        let unMountSourceArray = unmountSourceString.components(separatedBy: " ")
+        //statusTextView.string = statusTextView.string + runCommandReturnString(binary: "/usr/sbin/diskutil", arguments: unMountSource)
+        //let unmountSourceString = statusTextView.string.replacingOccurrences(of: "\n", with: "")
+        //let unMountSourceArray = unmountSourceString.components(separatedBy: " ")
         
         statusTextView.string = statusTextView.string  + runCommandReturnString(binary: "/usr/sbin/diskutil", arguments: unMountTarget)
         let unmountTargetString = statusTextView.string.replacingOccurrences(of: "\n", with: "")
         let unMountTargetArray = unmountTargetString.components(separatedBy: " ")
-        
-        if (unMountTargetArray.last == "successful" || unMountTargetArray.last == "unmounted")
-            && ( unMountSourceArray.last == "successful" || unMountTargetArray.last == "unmounted") {
-            let imageDisk = ["restore","--source", unmountSourceDevice, "--target", unmountTargetDevice, "-erase", "-noverify", "-noprompt"]
+        if (unMountTargetArray.last == "successful" || unMountTargetArray.last == "unmounted") {
+            statusTextView.string = statusTextView.string + runCommandReturnString(binary: "/usr/sbin/diskutil", arguments: MountTarget)
+            let imageDisk = ["-s", sourceDiskInfo.MountPoint, "-t", targetDiskInfo.MountPoint, "-er", "-nov", "-nop"]
             runProcessDiskToDisk(binary: "/usr/sbin/asr", arguments: imageDisk, mountSourceDisk: MountSource, mountTargetDisk: MountTarget)
         } else {
-            statusTextView.string = statusTextView.string + runCommandReturnString(binary: "/usr/sbin/diskutil", arguments: MountSource)
+            //statusTextView.string = statusTextView.string + runCommandReturnString(binary: "/usr/sbin/diskutil", arguments: MountSource)
             statusTextView.string = statusTextView.string + runCommandReturnString(binary: "/usr/sbin/diskutil", arguments: MountTarget)
         }
 
@@ -113,7 +112,22 @@ class ViewController: NSViewController {
         //print("HEY U!")
     }
     
+    
+ 
     override func viewDidLoad() {
+    
+        
+        
+        
+        //view.wantsLayer = true
+        //self.view.layer?.backgroundColor = .black
+
+        
+        
+    
+        //self.view.window?.minSize = NSSize(width: 1200, height: 1200)
+        //self.view.window?.maxSize = NSSize(width: 1200, height: 1200)
+        
         
         getDiskToImage = NotificationCenter.default.addObserver(self, selector: #selector(GotDiskToImage), name: .gotDiskToImage, object: nil)
         
@@ -185,7 +199,7 @@ class ViewController: NSViewController {
                         if unMountArray.last == "successful" {
                             
 
-                            let imageDisk = ["restore","--source", diskImageString, "--target", unmountTargetDevice, "-erase", "-noverify", "-noprompt"]
+                            let imageDisk = ["-s", diskImageString, "-t", targetDiskInfo.MountPoint, "-er", "-nov", "-nop"]
                             
                             runProcess(binary: "/usr/sbin/asr", arguments: imageDisk)
                         } else {
