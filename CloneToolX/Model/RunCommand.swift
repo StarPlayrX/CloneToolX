@@ -9,9 +9,12 @@
 import AppKit
 
 func runCommandReturnArray(binary: String, arguments: [String]) -> [String] {
-    
     let task = Process()
-    task.launchPath = binary
+    
+    //task.launchPath = binary
+    let file = "file://"
+    task.executableURL = URL(fileURLWithPath: file + binary)
+
     task.arguments = arguments
     let pipe = Pipe()
     task.standardOutput = pipe
@@ -40,7 +43,11 @@ func runCommandReturnArray(binary: String, arguments: [String]) -> [String] {
 func runCommandReturnString(binary: String, arguments: [String]) -> String {
     
     let task = Process()
-    task.launchPath = binary
+    
+    //task.launchPath = binary
+    let file = "file://"
+    task.executableURL = URL(fileURLWithPath: file + binary)
+    
     task.arguments = arguments
     let pipe = Pipe()
     task.standardOutput = pipe
