@@ -108,38 +108,14 @@ class ViewController: NSViewController {
     var volumes = Array<String>()
     var diskImageString = "";
     
-    override func viewWillAppear() {
-        //print("HEY U!")
-    }
-    
-    
- 
     override func viewDidLoad() {
-    
-        
-        
-        
-        //view.wantsLayer = true
-        //self.view.layer?.backgroundColor = .black
 
-        
-        
-    
-        //self.view.window?.minSize = NSSize(width: 1200, height: 1200)
-        //self.view.window?.maxSize = NSSize(width: 1200, height: 1200)
-        
-        
         getDiskToImage = NotificationCenter.default.addObserver(self, selector: #selector(GotDiskToImage), name: .gotDiskToImage, object: nil)
-        
         getDiskToDisk = NotificationCenter.default.addObserver(self, selector: #selector(GotDiskToDisk), name: .gotDiskToDisk, object: nil)
         
         schemaMenu.removeAllItems()
         sourceMenu.removeAllItems()
         targetMenu.removeAllItems()
-        //statusTextView.font = NSFont(name: "Andale Mono", size: 11.0)
-        
-        //cloneToolX_itemMenu.button?.title = "X"
-        //cloneToolX_itemMenu.menu = cloneToolX_menu
         
         self.view.window?.title = "CloneToolX"
         
@@ -225,42 +201,62 @@ class ViewController: NSViewController {
         }
     }
     
+    func getNameOfStartupDisk() -> String {
+        let script = "get text 1 thru -2 of (path to startup disk as string)"
+        if let startupDisk = performAppleScript(script: script) {
+            return startupDisk.text
+        } else {
+            return ""
+        }
+    }
+    
     @IBAction func schemaAction(_ sender: NSMenuItem) {
         let selection = sender.title as String
+        let startupVolume = "/"
+        let diskImageLabel = "Disk Image"
+        let slashVolumes = "/Volumes"
+        let ls = "/bin/ls"
         
         sourceMenu.removeAllItems()
         targetMenu.removeAllItems()
 
-        volumes = runCommandReturnArray(binary:"/bin/ls", arguments: ["/Volumes"])
+        volumes = runCommandReturnArray(binary: ls, arguments: [slashVolumes])
 
         if (selection == image2disk) {
             
-            sourceMenu.addItem(withTitle: "Disk Image")
+            sourceMenu.addItem(withTitle: diskImageLabel)
             
-            for t in volumes {
-                targetMenu.addItem(withTitle: t as String)
+            /// Get startup disk
+            for targetName in volumes {
+                if getNameOfStartupDisk() == targetName {
+                    //targetMenu.addItem(withTitle: startupVolume)
+                } else {
+                    targetMenu.addItem(withTitle: targetName)
+                }
             }
             
         } else if (selection == disk2image) {
             
-            for s in volumes {
-                sourceMenu.addItem(withTitle: s as String)
+            /// Get startup disk
+            for sourceName in volumes {
+                sourceMenu.addItem(withTitle: sourceName)
             }
             
-            targetMenu.addItem(withTitle: "Disk Image")
+            targetMenu.addItem(withTitle: diskImageLabel)
             
         } else if (selection == disk2disk) {
             
-            for v in volumes {
-                sourceMenu.addItem(withTitle: v as String)
-                targetMenu.addItem(withTitle: v as String)
+            for volume in volumes {
+                if getNameOfStartupDisk() == volume {
+                    sourceMenu.addItem(withTitle: startupVolume)
+                } else {
+                    sourceMenu.addItem(withTitle: volume)
+                    targetMenu.addItem(withTitle: volume)
+                }
             }
         }
     }
-    
-    
-    
-    
+
     func runProcessDiskToDisk(binary: String, arguments: [String], mountSourceDisk: [String], mountTargetDisk:[String] ) {
         self.statusTextView.string = ""
         

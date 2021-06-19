@@ -61,3 +61,23 @@ func runCommandReturnString(binary: String, arguments: [String]) -> String {
     return output
     
 }
+
+
+//set volname to text 1 thru -2 of (path to startup disk as string)
+/// Performs an AppleScript and return String and error NSDictionary.
+/// - Parameter script: script to run as text
+/// - Returns: returns a tuple with text as String ans error as an NSDirectionary
+func performAppleScript(script: String) -> (text: String, error: NSDictionary?)? {
+    
+    var text : String = ""
+    var error : NSDictionary?
+    
+    if let script = NSAppleScript(source: script) {
+        let result = script.executeAndReturnError(&error) as NSAppleEventDescriptor
+        if let str = result.stringValue {
+            text = str
+        }
+    }
+    
+    return (text: text, error: error)
+}
