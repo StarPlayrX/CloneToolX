@@ -78,10 +78,6 @@ class ViewController: NSViewController {
 
         }
         
-        //statusTextView.string = statusTextView.string + runCommandReturnString(binary: "/usr/sbin/diskutil", arguments: unMountSource)
-        //let unmountSourceString = statusTextView.string.replacingOccurrences(of: "\n", with: "")
-        //let unMountSourceArray = unmountSourceString.components(separatedBy: " ")
-        
         statusTextView.string = statusTextView.string  + runCommandReturnString(binary: "/usr/sbin/diskutil", arguments: unMountTarget)
         let unmountTargetString = statusTextView.string.replacingOccurrences(of: "\n", with: "")
         let unMountTargetArray = unmountTargetString.components(separatedBy: " ")
@@ -93,7 +89,6 @@ class ViewController: NSViewController {
             //statusTextView.string = statusTextView.string + runCommandReturnString(binary: "/usr/sbin/diskutil", arguments: MountSource)
             statusTextView.string = statusTextView.string + runCommandReturnString(binary: "/usr/sbin/diskutil", arguments: MountTarget)
         }
-
     }
 
     let image2disk = "Image to Disk"
@@ -300,10 +295,6 @@ class ViewController: NSViewController {
             process.waitUntilExit()
         }
     }
-    
-    
-    
-    
     
     func runProcess(binary: String, arguments: [String]) {
         self.statusTextView.string = ""
