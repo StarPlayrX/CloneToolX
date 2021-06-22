@@ -16,8 +16,12 @@ typealias diskInfoType = (DeviceIdentifier: String,     DeviceNode: String,     
 func diskInfo (volume: String) -> diskInfoType {
     
     //diskutil info -plist /Volumes/Install
-    
-    let diskInfo = ["info", "/Volumes/" + volume]
+    var diskInfo = [String]()
+    if volume == "/" {
+        diskInfo = ["info", "/"]
+    } else {
+        diskInfo = ["info", "/Volumes/\(volume)"]
+    }
     
     let diskArrayInfo = runCommandReturnString(binary: "/usr/sbin/diskutil", arguments: diskInfo)
     

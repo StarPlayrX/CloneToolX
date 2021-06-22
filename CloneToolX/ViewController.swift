@@ -46,56 +46,20 @@ class ViewController: NSViewController {
         let sourceDiskInfo = diskInfo(volume: sourceDisk)
         let targetDiskInfo = diskInfo(volume: targetDisk)
         
-        var unmountSourceDevice = ""
-        var unmountTargetDevice = ""
+        print("sourceDiskInfo", sourceDiskInfo)
         
-        var unMountSource = ["", ""]
-        var unMountTarget = ["", ""]
-        var MountSource = ["", ""]
-        var MountTarget = ["", ""]
-
-        if ( sourceDiskInfo.TypeBundle == "apfs" ) {
-            unmountSourceDevice = "/dev/" + sourceDiskInfo.PartofWhole
-            unMountSource = ["unmountDisk", unmountSourceDevice]
-            MountSource = ["mountDisk", unmountSourceDevice]
-
-        } else {
-            unmountSourceDevice = sourceDiskInfo.DeviceNode
-            unMountSource = ["unmount", unmountSourceDevice]
-            MountSource = ["mount", unmountSourceDevice]
-
-        }
+        print("targetDiskInfo", targetDiskInfo)
         
-        if ( targetDiskInfo.TypeBundle == "apfs" ) {
-            unmountTargetDevice = "/dev/" + targetDiskInfo.PartofWhole
-            unMountTarget = ["unmountDisk", unmountTargetDevice]
-            MountTarget = ["mountDisk", unmountTargetDevice]
-
-        } else {
-            unmountTargetDevice = targetDiskInfo.DeviceNode
-            unMountTarget = ["unmount", unmountTargetDevice]
-            MountTarget = ["mount", unmountTargetDevice]
-
-        }
-        
-        statusTextView.string = statusTextView.string  + runCommandReturnString(binary: "/usr/sbin/diskutil", arguments: unMountTarget)
-        let unmountTargetString = statusTextView.string.replacingOccurrences(of: "\n", with: "")
-        let unMountTargetArray = unmountTargetString.components(separatedBy: " ")
-        if (unMountTargetArray.last == "successful" || unMountTargetArray.last == "unmounted") {
-            statusTextView.string = statusTextView.string + runCommandReturnString(binary: "/usr/sbin/diskutil", arguments: MountTarget)
-            let imageDisk = ["-s", sourceDiskInfo.MountPoint, "-t", targetDiskInfo.MountPoint, "-er", "-nov", "-nop"]
-            runProcessDiskToDisk(binary: "/usr/sbin/asr", arguments: imageDisk, mountSourceDisk: MountSource, mountTargetDisk: MountTarget)
-        } else {
-            //statusTextView.string = statusTextView.string + runCommandReturnString(binary: "/usr/sbin/diskutil", arguments: MountSource)
-            statusTextView.string = statusTextView.string + runCommandReturnString(binary: "/usr/sbin/diskutil", arguments: MountTarget)
-        }
+        print(["-s", sourceDisk, "-t", targetDisk, "-er", "-nov", "-nop"])
+        let imageDisk = ["-s", sourceDiskInfo.MountPoint, "-t", targetDiskInfo.MountPoint, "-er", "-nov", "-nop"]
+        runProcessDiskToDisk(binary: "/usr/sbin/asr", arguments: imageDisk, mountSourceDisk: [sourceDiskInfo.DeviceIdentifier], mountTargetDisk: [targetDiskInfo.DeviceIdentifier])
     }
-
+    
     let image2disk = "Image to Disk"
     let disk2image = "Disk to Image"
     let disk2disk  = "Disk to Disk"
     let schemas = ["Select a Scheme", "Image to Disk", "Disk to Image", "Disk to Disk"]
-
+    
     var disk = ""
     var source_disk = ""
     var target_disk = ""
@@ -104,7 +68,7 @@ class ViewController: NSViewController {
     var diskImageString = "";
     
     override func viewDidLoad() {
-
+        
         getDiskToImage = NotificationCenter.default.addObserver(self, selector: #selector(GotDiskToImage), name: .gotDiskToImage, object: nil)
         getDiskToDisk = NotificationCenter.default.addObserver(self, selector: #selector(GotDiskToDisk), name: .gotDiskToDisk, object: nil)
         
@@ -118,7 +82,7 @@ class ViewController: NSViewController {
             schemaMenu.addItem(withTitle: s as String)
         }
     }
-
+    
     // disk image path text field
     @IBOutlet weak var diskImagePath: NSTextField!
     @IBOutlet weak var schemaMenu: NSPopUpButton!
@@ -138,14 +102,14 @@ class ViewController: NSViewController {
                 if let result = diskImageModal.url {
                     
                     targetDisk = targetMenu.title
-
+                    
                     diskImageString = result.path
                     diskImagePath.stringValue = diskImageString
                     
                     if diskImageString != "" {
                         
                         let targetDiskInfo = diskInfo(volume: targetDisk)
-
+                        
                         var unmountTargetDevice = ""
                         
                         var unMountTarget = ["", ""]
@@ -169,7 +133,7 @@ class ViewController: NSViewController {
                         let unMountArray = unmountString.components(separatedBy: " ") as [String]
                         if unMountArray.last == "successful" {
                             
-
+                            
                             let imageDisk = ["-s", diskImageString, "-t", targetDiskInfo.MountPoint, "-er", "-nov", "-nop"]
                             
                             runProcess(binary: "/usr/sbin/asr", arguments: imageDisk)
@@ -214,9 +178,9 @@ class ViewController: NSViewController {
         
         sourceMenu.removeAllItems()
         targetMenu.removeAllItems()
-
+        
         volumes = runCommandReturnArray(binary: ls, arguments: [slashVolumes])
-
+        
         if (selection == image2disk) {
             
             sourceMenu.addItem(withTitle: diskImageLabel)
@@ -251,7 +215,7 @@ class ViewController: NSViewController {
             }
         }
     }
-
+    
     func runProcessDiskToDisk(binary: String, arguments: [String], mountSourceDisk: [String], mountTargetDisk:[String] ) {
         self.statusTextView.string = ""
         
@@ -267,7 +231,7 @@ class ViewController: NSViewController {
             let handler =  { (file: FileHandle!) -> Void in
                 let data = file.availableData
                 guard let output = NSString(data: data, encoding: String.Encoding.utf8.rawValue)
-                    else { return}
+                else { return}
                 
                 DispatchQueue.main.async {
                     self.statusTextView.string = self.statusTextView.string + (output as String)
@@ -282,11 +246,11 @@ class ViewController: NSViewController {
                 
                 let sourceDisk = runCommandReturnString(binary: "/usr/sbin/diskutil", arguments: mountSourceDisk)
                 let targetDisk = runCommandReturnString(binary: "/usr/sbin/diskutil", arguments: mountTargetDisk)
-
+                
                 DispatchQueue.main.async {
                     self.statusTextView.string = self.statusTextView.string + sourceDisk
                     self.statusTextView.string = self.statusTextView.string + targetDisk
-
+                    
                     self.statusTextView.string = self.statusTextView.string  + "\n Job Finished."
                 }
             }
@@ -311,7 +275,7 @@ class ViewController: NSViewController {
             let handler =  { (file: FileHandle!) -> Void in
                 let data = file.availableData
                 guard let output = NSString(data: data, encoding: String.Encoding.utf8.rawValue)
-                    else { return}
+                else { return}
                 
                 DispatchQueue.main.async {
                     self.statusTextView.string = self.statusTextView.string + (output as String)

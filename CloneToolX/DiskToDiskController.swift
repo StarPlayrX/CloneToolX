@@ -31,8 +31,4 @@ class DiskToDisk: NSViewController {
             multiLabel.stringValue = warningText
         }
     }
-    
-    override func viewDidLoad() {
-        
-    }
 }
