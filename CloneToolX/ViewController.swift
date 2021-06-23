@@ -46,13 +46,8 @@ class ViewController: NSViewController {
         let sourceDiskInfo = diskInfo(volume: sourceDisk)
         let targetDiskInfo = diskInfo(volume: targetDisk)
         
-        print("sourceDiskInfo", sourceDiskInfo)
-        
-        print("targetDiskInfo", targetDiskInfo)
-        
-        print(["-s", sourceDisk, "-t", targetDisk, "-er", "-nov", "-nop"])
         let imageDisk = ["-s", sourceDiskInfo.MountPoint, "-t", targetDiskInfo.MountPoint, "-er", "-nov", "-nop"]
-        runProcessDiskToDisk(binary: "/usr/sbin/asr", arguments: imageDisk, mountSourceDisk: [sourceDiskInfo.DeviceIdentifier], mountTargetDisk: [targetDiskInfo.DeviceIdentifier])
+        runProcessDiskToDisk(binary: "/usr/sbin/asr", arguments: imageDisk)
     }
     
     let image2disk = "Image to Disk"
@@ -216,7 +211,7 @@ class ViewController: NSViewController {
         }
     }
     
-    func runProcessDiskToDisk(binary: String, arguments: [String], mountSourceDisk: [String], mountTargetDisk:[String] ) {
+    func runProcessDiskToDisk(binary: String, arguments: [String]) {
         self.statusTextView.string = ""
         
         DispatchQueue.global(qos: .background).async {
@@ -244,13 +239,7 @@ class ViewController: NSViewController {
             process.terminationHandler = { (task: Process?) -> () in
                 pipe.fileHandleForReading.readabilityHandler = nil
                 
-                let sourceDisk = runCommandReturnString(binary: "/usr/sbin/diskutil", arguments: mountSourceDisk)
-                let targetDisk = runCommandReturnString(binary: "/usr/sbin/diskutil", arguments: mountTargetDisk)
-                
                 DispatchQueue.main.async {
-                    self.statusTextView.string = self.statusTextView.string + sourceDisk
-                    self.statusTextView.string = self.statusTextView.string + targetDisk
-                    
                     self.statusTextView.string = self.statusTextView.string  + "\n Job Finished."
                 }
             }
