@@ -62,7 +62,6 @@ func runCommandReturnString(binary: String, arguments: [String]) -> String {
     
 }
 
-
 //set volname to text 1 thru -2 of (path to startup disk as string)
 /// Performs an AppleScript and return String and error NSDictionary.
 /// - Parameter script: script to run as text
