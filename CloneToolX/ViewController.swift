@@ -10,7 +10,8 @@ import AppKit
 
 class ViewController: NSViewController {
     
-    @objc func GotDiskToImage(_ notification:Notification){
+    @objc func GotDiskToImage(_ notification:Notification) {
+        
         diskImagePath.stringValue = disk2imageFolder + diskImageName
         diskImageString = disk2imageFolder + diskImageName
         
@@ -18,26 +19,27 @@ class ViewController: NSViewController {
         
         statusTextView.string = runCommandReturnString(binary: "/usr/sbin/diskutil", arguments: targetVolume)
         
-        let unMountTarget = ["unmountDisk", "/Volumes/" + sourceMenu.title]
-        
-        statusTextView.string = runCommandReturnString(binary: "/usr/sbin/diskutil", arguments: unMountTarget)
+        if sourceMenu.title != "/" {
+            let unMountTarget = ["unmountDisk", "/Volumes/" + sourceMenu.title]
+            statusTextView.string = runCommandReturnString(binary: "/usr/sbin/diskutil", arguments: unMountTarget)
+        }
         
         let unmountString = statusTextView.string.replacingOccurrences(of: "\n", with: "")
         let unMountArray = unmountString.components(separatedBy: " ") //as [String]
         
-        if unMountArray.last == "successful" {
-            disk = "/dev/" + unMountArray[5]
-            print(disk)
-            print(diskImageString)
-            
-            //using Zlib compression. May offer options later\
-            //-ov overwrites an existing disk image
-            let imageDisk = ["create","-format","UDZO","-srcdevice", disk, diskImageString, "-ov"]
-            runProcess(binary: "/usr/bin/hdiutil", arguments: imageDisk)
-        } else {
-            let unMountTarget = ["mountDisk", disk]
-            statusTextView.string = runCommandReturnString(binary: "/usr/sbin/diskutil", arguments: unMountTarget)
-        }
+        //if unMountArray.last == "successful" {
+        disk = "/dev/" + unMountArray[5]
+        print(disk)
+        print(diskImageString)
+        
+        //using Zlib compression. May offer options later\
+        //-ov overwrites an existing disk image
+        let imageDisk = ["create","-format","UDZO","-srcdevice", disk, diskImageString, "-ov"]
+        
+        print("/usr/bin/hdiutil create -format UDZO -srcdevice \(disk), \(diskImageString) -ov")
+        
+        runProcess(binary: "/usr/bin/hdiutil", arguments: imageDisk)
+        
     }
     
     /* Disk to Disk Action */
@@ -180,20 +182,23 @@ class ViewController: NSViewController {
             
             sourceMenu.addItem(withTitle: diskImageLabel)
             
-            /// Get startup disk
             for targetName in volumes {
                 if getNameOfStartupDisk() == targetName {
-                    //targetMenu.addItem(withTitle: startupVolume)
                 } else {
-                    targetMenu.addItem(withTitle: targetName)
+                    if targetName != "Preboot" && targetName != "Recovery" {
+                        targetMenu.addItem(withTitle: targetName)
+                    }
                 }
             }
             
         } else if (selection == disk2image) {
             
-            /// Get startup disk
             for sourceName in volumes {
-                sourceMenu.addItem(withTitle: sourceName)
+                if getNameOfStartupDisk() != sourceName {
+                    if sourceName != "Preboot" && sourceName != "Recovery" {
+                        sourceMenu.addItem(withTitle: sourceName)
+                    }
+                }
             }
             
             targetMenu.addItem(withTitle: diskImageLabel)
@@ -204,8 +209,13 @@ class ViewController: NSViewController {
                 if getNameOfStartupDisk() == volume {
                     sourceMenu.addItem(withTitle: startupVolume)
                 } else {
-                    sourceMenu.addItem(withTitle: volume)
-                    targetMenu.addItem(withTitle: volume)
+                    if volume != "Preboot" && volume != "Recovery" {
+                        sourceMenu.addItem(withTitle: volume)
+                    }
+                    
+                   if volume != "Preboot" && volume != "Recovery" {
+                        targetMenu.addItem(withTitle: volume)
+                    }
                 }
             }
         }
