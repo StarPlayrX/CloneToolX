@@ -15,29 +15,17 @@ class ViewController: NSViewController {
         diskImagePath.stringValue = disk2imageFolder + diskImageName
         diskImageString = disk2imageFolder + diskImageName
         
-        let targetVolume = ["list", "/Volumes/" + sourceMenu.title]
+        let sourceDiskInfo = diskInfo(volume: sourceMenu.title)
+        disk = "/dev/" + sourceDiskInfo.PartofWhole
+
+        //let sourceVolume = ["list", "/Volumes/" + sourceMenu.title]
+        //statusTextView.string = runCommandReturnString(binary: "/usr/sbin/diskutil", arguments: sourceVolume)
         
-        statusTextView.string = runCommandReturnString(binary: "/usr/sbin/diskutil", arguments: targetVolume)
+        let args = ["unmountDisk", sourceDiskInfo.MountPoint]
+        statusTextView.string = runCommandReturnString(binary: "/usr/sbin/diskutil", arguments: args)
         
-        if sourceMenu.title != "/" {
-            let unMountTarget = ["unmountDisk", "/Volumes/" + sourceMenu.title]
-            statusTextView.string = runCommandReturnString(binary: "/usr/sbin/diskutil", arguments: unMountTarget)
-        }
-        
-        let unmountString = statusTextView.string.replacingOccurrences(of: "\n", with: "")
-        let unMountArray = unmountString.components(separatedBy: " ") //as [String]
-        
-        //if unMountArray.last == "successful" {
-        disk = "/dev/" + unMountArray[5]
-        print(disk)
-        print(diskImageString)
-        
-        //using Zlib compression. May offer options later\
         //-ov overwrites an existing disk image
         let imageDisk = ["create","-format","UDZO","-srcdevice", disk, diskImageString, "-ov"]
-        
-        print("/usr/bin/hdiutil create -format UDZO -srcdevice \(disk), \(diskImageString) -ov")
-        
         runProcess(binary: "/usr/bin/hdiutil", arguments: imageDisk)
         
     }
@@ -48,7 +36,7 @@ class ViewController: NSViewController {
         let sourceDiskInfo = diskInfo(volume: sourceDisk)
         let targetDiskInfo = diskInfo(volume: targetDisk)
         
-        let imageDisk = ["-s", sourceDiskInfo.MountPoint, "-t", targetDiskInfo.MountPoint, "-er", "-nov", "-nop"]
+        let imageDisk = ["-s", sourceDiskInfo.DeviceNode, "-t", targetDiskInfo.DeviceNode, "-er", "-nov", "-nop", "-verbose"]
         runProcessDiskToDisk(binary: "/usr/sbin/asr", arguments: imageDisk)
     }
     
@@ -103,40 +91,10 @@ class ViewController: NSViewController {
                     diskImageString = result.path
                     diskImagePath.stringValue = diskImageString
                     
-                    if diskImageString != "" {
-                        
+                    if !diskImageString.isEmpty {
                         let targetDiskInfo = diskInfo(volume: targetDisk)
-                        
-                        var unmountTargetDevice = ""
-                        
-                        var unMountTarget = ["", ""]
-                        var MountTarget = ["", ""]
-                        
-                        if ( targetDiskInfo.TypeBundle == "apfs" ) {
-                            unmountTargetDevice = "/dev/" + targetDiskInfo.PartofWhole
-                            unMountTarget = ["unmountDisk", unmountTargetDevice]
-                            MountTarget = ["mountDisk", unmountTargetDevice]
-                            
-                        } else {
-                            unmountTargetDevice = targetDiskInfo.DeviceNode
-                            unMountTarget = ["unmount", unmountTargetDevice]
-                            MountTarget = ["mount", unmountTargetDevice]
-                            
-                        }
-                        
-                        statusTextView.string = runCommandReturnString(binary: "/usr/sbin/diskutil", arguments: unMountTarget)
-                        
-                        let unmountString = statusTextView.string.replacingOccurrences(of: "\n", with: "")
-                        let unMountArray = unmountString.components(separatedBy: " ") as [String]
-                        if unMountArray.last == "successful" {
-                            
-                            
-                            let imageDisk = ["-s", diskImageString, "-t", targetDiskInfo.MountPoint, "-er", "-nov", "-nop"]
-                            
-                            runProcess(binary: "/usr/sbin/asr", arguments: imageDisk)
-                        } else {
-                            statusTextView.string = statusTextView.string + runCommandReturnString(binary: "/usr/sbin/diskutil", arguments: MountTarget)
-                        }
+                        let imageDisk = ["-s", diskImageString, "-t", targetDiskInfo.DeviceNode, "-er", "-nov", "-nop"]
+                        runProcess(binary: "/usr/sbin/asr", arguments: imageDisk)
                     }
                 }
             }
@@ -158,12 +116,13 @@ class ViewController: NSViewController {
     }
     
     func getNameOfStartupDisk() -> String {
-        let script = "get text 1 thru -2 of (path to startup disk as string)"
-        if let startupDisk = performAppleScript(script: script) {
-            return startupDisk.text
-        } else {
-            return ""
-        }
+        /*let script = "get text 1 thru -2 of (path to startup disk as string)"
+         if let startupDisk = performAppleScript(script: script) {
+         return startupDisk.text
+         } else {
+         return ""
+         }*/
+        return "**StartupDisksNotAreAllowed**"
     }
     
     @IBAction func schemaAction(_ sender: NSMenuItem) {
@@ -213,7 +172,7 @@ class ViewController: NSViewController {
                         sourceMenu.addItem(withTitle: volume)
                     }
                     
-                   if volume != "Preboot" && volume != "Recovery" {
+                    if volume != "Preboot" && volume != "Recovery" {
                         targetMenu.addItem(withTitle: volume)
                     }
                 }
