@@ -8,10 +8,18 @@
 
 import Foundation
 
-typealias diskInfoType = (DeviceIdentifier: String,     DeviceNode: String,     Whole: String,      PartofWhole: String,
-    VolumeName: String,           Mounted: String,        MountPoint: String,
-    TypeBundle: String,           Owners: String,
-    OSCanBeInstalled: String)
+typealias diskInfoType = (
+    DeviceIdentifier: String,
+    DeviceNode: String,
+    Whole: String,
+    PartofWhole: String,
+    VolumeName: String,
+    Mounted: String,
+    MountPoint: String,
+    TypeBundle: String,
+    Owners: String,
+    OSCanBeInstalled: String
+)
 
 func diskInfo (volume: String) -> diskInfoType {
     

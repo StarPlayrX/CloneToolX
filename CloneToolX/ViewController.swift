@@ -9,17 +9,26 @@
 import AppKit
 
 class ViewController: NSViewController {
+     
+    let image2disk = "Image to Disk"
+    let disk2image = "Disk to Image"
+    let disk2disk  = "Disk to Disk"
+    let schemas = ["Select a Scheme", "Image to Disk", "Disk to Image", "Disk to Disk"]
+    
+    var disk = ""
+    var source_disk = ""
+    var target_disk = ""
+    
+    var volumes = Array<String>()
+    var diskImageString = ""
     
     @objc func GotDiskToImage(_ notification:Notification) {
         
-        diskImagePath.stringValue = disk2imageFolder + diskImageName
         diskImageString = disk2imageFolder + diskImageName
+        diskImagePath.stringValue = diskImageString
         
-        let sourceDiskInfo = diskInfo(volume: sourceMenu.title)
+        let sourceDiskInfo = diskInfo(volume: sourceDisk)
         disk = "/dev/" + sourceDiskInfo.PartofWhole
-
-        //let sourceVolume = ["list", "/Volumes/" + sourceMenu.title]
-        //statusTextView.string = runCommandReturnString(binary: "/usr/sbin/diskutil", arguments: sourceVolume)
         
         let args = ["unmountDisk", sourceDiskInfo.MountPoint]
         statusTextView.string = runCommandReturnString(binary: "/usr/sbin/diskutil", arguments: args)
@@ -27,7 +36,6 @@ class ViewController: NSViewController {
         //-ov overwrites an existing disk image
         let imageDisk = ["create","-format","UDZO","-srcdevice", disk, diskImageString, "-ov"]
         runProcess(binary: "/usr/bin/hdiutil", arguments: imageDisk)
-        
     }
     
     /* Disk to Disk Action */
@@ -40,17 +48,7 @@ class ViewController: NSViewController {
         runProcessDiskToDisk(binary: "/usr/sbin/asr", arguments: imageDisk)
     }
     
-    let image2disk = "Image to Disk"
-    let disk2image = "Disk to Image"
-    let disk2disk  = "Disk to Disk"
-    let schemas = ["Select a Scheme", "Image to Disk", "Disk to Image", "Disk to Disk"]
-    
-    var disk = ""
-    var source_disk = ""
-    var target_disk = ""
-    
-    var volumes = Array<String>()
-    var diskImageString = "";
+ 
     
     override func viewDidLoad() {
         
@@ -76,6 +74,8 @@ class ViewController: NSViewController {
     @IBOutlet var statusTextView: NSTextView!
     
     @IBAction func cloneAdisk(_ sender: Any) {
+        sourceDisk = sourceMenu.title
+        targetDisk = targetMenu.title
         
         let scheme = schemaMenu.title
         
@@ -85,9 +85,7 @@ class ViewController: NSViewController {
             
             if (diskImageModal.runModal() == NSApplication.ModalResponse.OK) {
                 if let result = diskImageModal.url {
-                    
-                    targetDisk = targetMenu.title
-                    
+                                        
                     diskImageString = result.path
                     diskImagePath.stringValue = diskImageString
                     
@@ -109,8 +107,7 @@ class ViewController: NSViewController {
                 }
             }
         } else if scheme == disk2disk {
-            sourceDisk = sourceMenu.title
-            targetDisk = targetMenu.title
+     
             performSegue(withIdentifier: "disk2disk", sender: self)
         }
     }
@@ -122,7 +119,9 @@ class ViewController: NSViewController {
          } else {
          return ""
          }*/
-        return "**StartupDisksNotAreAllowed**"
+        
+        //Turning startup disks off are we intend to run this in BigMac's Boot Diskx
+        return "slash / **StartupDisksNotAreAllowed**"
     }
     
     @IBAction func schemaAction(_ sender: NSMenuItem) {
@@ -138,9 +137,7 @@ class ViewController: NSViewController {
         volumes = runCommandReturnArray(binary: ls, arguments: [slashVolumes])
         
         if (selection == image2disk) {
-            
             sourceMenu.addItem(withTitle: diskImageLabel)
-            
             for targetName in volumes {
                 if getNameOfStartupDisk() == targetName {
                 } else {

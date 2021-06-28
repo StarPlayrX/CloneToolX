@@ -10,15 +10,17 @@ import AppKit
 
 var disk2imageFolder = ""
 var diskImageName = ""
+
 var sourceDisk = ""
 var targetDisk = ""
+
 let dmgSuffix = ".dmg"
 let folderSlash = "/"
 let diskFolderModal = NSOpenPanel()
 let diskImageModal = NSOpenPanel()
 
-var getDiskToImage : ()? = nil
-var getDiskToDisk : ()? = nil
+var getDiskToImage: ()? = nil
+var getDiskToDisk: ()? = nil
 
 func setupDiskImageModal() {
     diskImageModal.showsResizeIndicator    = true
