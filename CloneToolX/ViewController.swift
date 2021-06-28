@@ -48,8 +48,6 @@ class ViewController: NSViewController {
         runProcessDiskToDisk(binary: "/usr/sbin/asr", arguments: imageDisk)
     }
     
- 
-    
     override func viewDidLoad() {
         
         getDiskToImage = NotificationCenter.default.addObserver(self, selector: #selector(GotDiskToImage), name: .gotDiskToImage, object: nil)
@@ -120,7 +118,7 @@ class ViewController: NSViewController {
          return ""
          }*/
         
-        //Turning startup disks off are we intend to run this in BigMac's Boot Diskx
+        //Turning startup disks off as we intend to distribute via Big Mac 2.0 for its debut
         return "slash / **StartupDisksNotAreAllowed**"
     }
     
@@ -141,7 +139,7 @@ class ViewController: NSViewController {
             for targetName in volumes {
                 if getNameOfStartupDisk() == targetName {
                 } else {
-                    if targetName != "Preboot" && targetName != "Recovery" {
+                    if targetName != "Preboot" && targetName != "Recovery" && !targetName.starts(with: ".")  {
                         targetMenu.addItem(withTitle: targetName)
                     }
                 }
@@ -151,7 +149,7 @@ class ViewController: NSViewController {
             
             for sourceName in volumes {
                 if getNameOfStartupDisk() != sourceName {
-                    if sourceName != "Preboot" && sourceName != "Recovery" {
+                    if sourceName != "Preboot" && sourceName != "Recovery" && !sourceName.starts(with: ".") {
                         sourceMenu.addItem(withTitle: sourceName)
                     }
                 }
@@ -165,11 +163,8 @@ class ViewController: NSViewController {
                 if getNameOfStartupDisk() == volume {
                     sourceMenu.addItem(withTitle: startupVolume)
                 } else {
-                    if volume != "Preboot" && volume != "Recovery" {
+                    if volume != "Preboot" && volume != "Recovery" && !volume.starts(with: ".") {
                         sourceMenu.addItem(withTitle: volume)
-                    }
-                    
-                    if volume != "Preboot" && volume != "Recovery" {
                         targetMenu.addItem(withTitle: volume)
                     }
                 }
