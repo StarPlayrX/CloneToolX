@@ -18,11 +18,13 @@ Don't want to use CloneToolX but still want to create a bootable backup? Try thi
 sudo asr -s / -t /Volumes/nameOfTarget -er -nov -nop
 
 -s = source
+
 -t = target
 
 -er = erase target partition (always backup to a partition, recommend not backing up to a volume group, cuz you can only have one live backup per a single volume group on a partition. This may seem ok, but you are better off making a partion for each backup with multiple partitions per disk (IE can have multiple backups, provided enough space is allowed).
 
 -nov = no verify, usually a faster backup especially on clean systems with an intial macOS app setup
+
 -nop = no prompt for erase
 
 Works best with APFS freshly erased partitions
